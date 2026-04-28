@@ -1,0 +1,17 @@
+package sme.tech.innovators.sme.exception;
+
+public final class ErrorCodes {
+
+    private ErrorCodes() {}
+
+    public static final String EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS";
+    public static final String INVALID_TOKEN = "INVALID_TOKEN";
+    public static final String TOKEN_EXPIRED = "TOKEN_EXPIRED";
+    public static final String RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED";
+    public static final String VALIDATION_FAILED = "VALIDATION_FAILED";
+    public static final String INVALID_PASSWORD = "INVALID_PASSWORD";
+    public static final String SLUG_GENERATION_FAILED = "SLUG_GENERATION_FAILED";
+    public static final String ACCESS_DENIED = "ACCESS_DENIED";
+    public static final String TOKEN_REVOKED = "TOKEN_REVOKED";
+    public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
+}

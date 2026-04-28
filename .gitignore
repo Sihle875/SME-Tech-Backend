@@ -1,0 +1,12 @@
+# Kiro IDE files
+.kiro/
+
+# Documents
+sme/documents/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

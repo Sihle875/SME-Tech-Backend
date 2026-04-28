@@ -1,0 +1,60 @@
+package sme.tech.innovators.sme.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import sme.tech.innovators.sme.entity.AccountStatus;
+import sme.tech.innovators.sme.entity.User;
+import sme.tech.innovators.sme.entity.VerificationToken;
+import sme.tech.innovators.sme.exception.InvalidTokenException;
+import sme.tech.innovators.sme.exception.TokenExpiredException;
+import sme.tech.innovators.sme.repository.UserRepository;
+import sme.tech.innovators.sme.repository.VerificationTokenRepository;
+import sme.tech.innovators.sme.util.TokenGenerator;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class VerificationService {
+
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final UserRepository userRepository;
+    private final TokenGenerator tokenGenerator;
+    private final EmailService emailService;
+
+    @Transactional
+    public VerificationToken createVerificationToken(User user) {
+        verificationTokenRepository.deleteByUser(user);
+        verificationTokenRepository.flush();
+        VerificationToken token = VerificationToken.builder()
+                .token(tokenGenerator.generateSecureToken())
+                .user(user)
+                .build();
+        return verificationTokenRepository.save(token);
+    }
+
+    @Transactional
+    public void verifyToken(String tokenValue) {
+        VerificationToken token = verificationTokenRepository.findByToken(tokenValue)
+                .orElseThrow(() -> new InvalidTokenException("Verification token not found"));
+
+        if (token.isExpired()) {
+            throw new TokenExpiredException("Verification token has expired");
+        }
+
+        User user = token.getUser();
+        user.setAccountStatus(AccountStatus.VERIFIED);
+        userRepository.save(user);
+        verificationTokenRepository.delete(token);
+    }
+
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmailAndIsDeletedFalse(email)
+                .orElseThrow(() -> new InvalidTokenException("User not found"));
+
+        VerificationToken newToken = createVerificationToken(user);
+        emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), newToken.getToken());
+    }
+}
