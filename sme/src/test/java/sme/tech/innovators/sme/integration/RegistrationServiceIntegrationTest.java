@@ -7,9 +7,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import sme.tech.innovators.sme.dto.request.BusinessRegistrationDto;
+import sme.tech.innovators.sme.dto.request.BusinessRegistrationRequest;
 import sme.tech.innovators.sme.dto.request.RegistrationRequest;
-import sme.tech.innovators.sme.dto.request.UserRegistrationDto;
 import sme.tech.innovators.sme.dto.response.RegistrationResponse;
 import sme.tech.innovators.sme.exception.EmailAlreadyExistsException;
 import sme.tech.innovators.sme.repository.BusinessRepository;
@@ -42,16 +41,13 @@ class RegistrationServiceIntegrationTest {
     private JavaMailSender javaMailSender;
 
     private RegistrationRequest buildRequest(String email, String businessName) {
-        UserRegistrationDto user = new UserRegistrationDto();
-        user.setEmail(email);
-        user.setPassword("SecurePass1!");
-        user.setFullName("Test User");
-
-        BusinessRegistrationDto business = new BusinessRegistrationDto();
-        business.setName(businessName);
+        BusinessRegistrationRequest business = new BusinessRegistrationRequest();
+        business.setEmail(email);
+        business.setPassword("SecurePass1!");
+        business.setFullName("Test User");
+        business.setBusinessName(businessName);
 
         RegistrationRequest request = new RegistrationRequest();
-        request.setUser(user);
         request.setBusiness(business);
         return request;
     }
