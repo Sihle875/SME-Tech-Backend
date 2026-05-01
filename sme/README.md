@@ -157,21 +157,42 @@ Schema is managed by Hibernate (`ddl-auto: update`). No manual migrations needed
 
 ## Deployment
 
-The application is deployed to **Azure App Service** (`sme-operations`) via GitHub Actions on every push to `main`.
+The application is containerised and deployed to **Azure App Service** (`sme-tech`) via GitHub Actions on every push to `main`.
 
-### CI/CD Pipeline (`.github/workflows/main_sme-operations.yml`)
+### CI/CD Pipeline (`.github/workflows/main_sme-tech.yml`)
 
-| Step | Description |
-|------|-------------|
-| Build | Compiles and packages the JAR using `mvn clean package -DskipTests` |
-| Deploy | Uploads the JAR to Azure App Service (Production slot) |
+The pipeline runs two sequential jobs:
 
-**Startup command** used by Azure to launch the application:
+| Job | Step | Description |
+|-----|------|-------------|
+| `build-and-push` | Checkout | Checks out the repository |
+| | Docker Buildx | Sets up multi-platform build support |
+| | Docker Hub login | Authenticates with Docker Hub using `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` secrets |
+| | Build & push image | Builds the Docker image from `sme/Dockerfile` and pushes two tags to Docker Hub: `latest` and the commit SHA |
+| `deploy` | Azure login | Authenticates with Azure via OIDC (Workload Identity Federation) |
+| | Deploy to App Service | Pulls the commit-SHA-tagged image from Docker Hub and deploys it to the `sme-tech` Production slot |
+
+### Docker Image
+
+Images are published to Docker Hub under:
 ```
-java -jar /home/site/wwwroot/*.jar
+<DOCKERHUB_USERNAME>/sme-tech-backend:<commit-sha>
+<DOCKERHUB_USERNAME>/sme-tech-backend:latest
 ```
 
-> Environment variables (DB credentials, JWT secret, mail credentials, CORS origins) must be configured in the Azure App Service **Configuration → Application Settings** panel — they are not bundled into the JAR.
+Deployments always use the commit SHA tag (not `latest`) to ensure traceability and prevent accidental rollouts of stale images.
+
+### Required GitHub Secrets
+
+| Secret | Description |
+|--------|-------------|
+| `DOCKERHUB_USERNAME` | Docker Hub account username |
+| `DOCKERHUB_TOKEN` | Docker Hub access token (not your account password) |
+| `AZUREAPPSERVICE_CLIENTID_*` | Azure AD app client ID for OIDC login |
+| `AZUREAPPSERVICE_TENANTID_*` | Azure AD tenant ID |
+| `AZUREAPPSERVICE_SUBSCRIPTIONID_*` | Azure subscription ID |
+
+> Environment variables (DB credentials, JWT secret, mail credentials, CORS origins) must be configured in the Azure App Service **Configuration → Application Settings** panel — they are not baked into the Docker image.
 
 ---
 

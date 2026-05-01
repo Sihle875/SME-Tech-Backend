@@ -89,6 +89,15 @@ springdoc:
     tagsSorter: alpha
     try-it-out-enabled: true
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
 ---
 spring:
   config:
