@@ -27,7 +27,8 @@ public class OpenApiConfig {
                                 .name("SME Tech Innovators")
                                 .email("smetechinnovators@gmail.com")))
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("Local Development")))
+                        new Server().url("http://localhost:8080").description("Local Development"),
+                        new Server().url("https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net").description("Production")))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication", new SecurityScheme()
