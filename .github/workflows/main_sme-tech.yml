@@ -61,4 +61,4 @@ jobs:
           app-name: 'sme-tech'
           slot-name: 'Production'
           package: '*.jar'
-          startup-command: 'java -jar /home/site/wwwroot/*.jar'
+          clean: true
