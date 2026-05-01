@@ -11,4 +11,4 @@ WORKDIR /app
 
 RUN mvn -f pom.xml clean package -DskipTests
 
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["sh", "-c", "java -jar target/*.jar"]
