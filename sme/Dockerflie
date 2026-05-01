@@ -1,14 +1,9 @@
-# Use official Java image
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk
 
-# Set working directory
-WORKDIR /app
+WORKDIR /app/src
 
-# Copy project files
-COPY . .
+COPY src/ .
 
-# Build the application
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
-# Run the JAR file
-CMD ["java", "-jar", "target/*.jar"]
+CMD ["java", "-jar", "../target/*.jar"]
