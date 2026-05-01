@@ -22,8 +22,8 @@ All secrets are injected via environment variables. **Never hardcode credentials
 | `DB_URL`                | Full JDBC connection URL (with SSL)              | Aiven PostgreSQL (`smetech` DB, port 12667, `sslmode=require`) |
 | `DB_USERNAME`           | PostgreSQL username                              | `avnadmin`                                                    |
 | `DB_PASSWORD`           | PostgreSQL password                              | `changeme` — **must be overridden**                           |
-| `SPRING_MAIL_USERNAME`  | Gmail address used for sending emails            | `smetechinnovators@gmail.com`                                 |
-| `SPRING_MAIL_PASSWORD`  | Gmail App Password (not your account password)   | `changeme` — **must be overridden**                           |
+| `APP_EMAIL`             | Gmail address used for sending emails            | `smetechinnovators@gmail.com`                                 |
+| `APP_PASSWORD`          | Gmail App Password (not your account password)   | `changeme` — **must be overridden**                           |
 | `JWT_SECRET`            | Hex-encoded 256-bit secret for JWT signing       | Insecure default — **must be overridden in production**       |
 | `APP_BASE_URL`          | Base URL used in email verification links        | `https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net` |
 | `APP_DOMAIN`            | Domain used for public storefront links          | `localhost:8080`                                              |
@@ -36,8 +36,8 @@ All secrets are injected via environment variables. **Never hardcode credentials
 export DB_URL="jdbc:postgresql://pg-23b34967-sihlentshangase06-6d21.b.aivencloud.com:12667/smetech?sslmode=require"
 export DB_USERNAME=avnadmin
 export DB_PASSWORD=your-db-password
-export SPRING_MAIL_USERNAME=yourapp@gmail.com
-export SPRING_MAIL_PASSWORD="xxxx xxxx xxxx xxxx"
+export APP_EMAIL=yourapp@gmail.com
+export APP_PASSWORD="xxxx xxxx xxxx xxxx"
 export JWT_SECRET=your-hex-encoded-secret
 export APP_BASE_URL="https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net"
 export APP_DOMAIN="sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net"
@@ -49,8 +49,8 @@ export CORS_ALLOWED_ORIGINS="http://localhost:8080,http://localhost:5173,https:/
 $env:DB_URL="jdbc:postgresql://pg-23b34967-sihlentshangase06-6d21.b.aivencloud.com:12667/smetech?sslmode=require"
 $env:DB_USERNAME="avnadmin"
 $env:DB_PASSWORD="your-db-password"
-$env:SPRING_MAIL_USERNAME="yourapp@gmail.com"
-$env:SPRING_MAIL_PASSWORD="xxxx xxxx xxxx xxxx"
+$env:APP_EMAIL="yourapp@gmail.com"
+$env:APP_PASSWORD="xxxx xxxx xxxx xxxx"
 $env:JWT_SECRET="your-hex-encoded-secret"
 $env:APP_BASE_URL="https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net"
 $env:APP_DOMAIN="sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net"
@@ -64,8 +64,8 @@ Create `sme/.env` (already in `.gitignore`):
 DB_URL=jdbc:postgresql://pg-23b34967-sihlentshangase06-6d21.b.aivencloud.com:12667/smetech?sslmode=require
 DB_USERNAME=avnadmin
 DB_PASSWORD=your-db-password
-SPRING_MAIL_USERNAME=yourapp@gmail.com
-SPRING_MAIL_PASSWORD=xxxx xxxx xxxx xxxx
+APP_EMAIL=yourapp@gmail.com
+APP_PASSWORD=xxxx xxxx xxxx xxxx
 JWT_SECRET=your-hex-encoded-secret
 APP_BASE_URL=https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net
 APP_DOMAIN=sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net
@@ -103,6 +103,25 @@ $env:CORS_ALLOWED_ORIGINS="https://your-frontend.com,https://another-origin.com"
 ```
 
 > **Note:** If you are deploying behind Azure App Service, set `CORS_ALLOWED_ORIGINS` in **Configuration → Application Settings** rather than managing CORS in the Azure portal's CORS blade — the application handles it directly.
+
+---
+
+## Mail (SMTP)
+
+Email is sent via Gmail SMTP using async delivery with retry logic (3 attempts, exponential backoff: 1s → 2s → 4s).
+
+| Setting              | Value              |
+|----------------------|--------------------|
+| Host                 | `smtp.gmail.com`   |
+| Port                 | `587` (STARTTLS)   |
+| Auth                 | Required           |
+| Connection timeout   | 10,000 ms          |
+| Read timeout         | 10,000 ms          |
+| Write timeout        | 10,000 ms          |
+
+Credentials are injected via `APP_EMAIL` and `APP_PASSWORD` environment variables. Use a Gmail App Password — not your account password.
+
+> The test profile disables SMTP entirely and uses a local stub on port 3025.
 
 ---
 

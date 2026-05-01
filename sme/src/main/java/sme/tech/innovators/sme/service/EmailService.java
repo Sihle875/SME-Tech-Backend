@@ -19,7 +19,7 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.mail}")
     private String fromEmail;
 
     @Async("emailTaskExecutor")
@@ -50,9 +50,11 @@ public class EmailService {
                 message.setSubject(subject);
                 message.setText(body);
                 mailSender.send(message);
+                log.info("Email [{}] sent successfully to {} on attempt {}", emailType, toEmail, attempt + 1);
                 return;
             } catch (Exception e) {
-                log.warn("Email send attempt {} failed for {}: {}", attempt + 1, toEmail, e.getMessage());
+                log.warn("Email [{}] send attempt {}/{} failed for {}: {}",
+                        emailType, attempt + 1, maxRetries, toEmail, e.getMessage());
                 auditService.logSecurityEvent(emailType + "_FAILURE", "system", toEmail,
                         "Attempt " + (attempt + 1) + ": " + e.getMessage());
                 if (attempt < maxRetries - 1) {
@@ -65,6 +67,6 @@ public class EmailService {
                 }
             }
         }
-        log.error("All {} email send attempts failed for {}", maxRetries, toEmail);
+        log.error("All {} email send attempts failed for {} [type={}]", maxRetries, toEmail, emailType);
     }
 }

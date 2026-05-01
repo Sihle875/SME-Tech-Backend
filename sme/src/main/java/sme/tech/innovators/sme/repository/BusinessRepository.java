@@ -11,4 +11,5 @@ public interface BusinessRepository extends JpaRepository<Business, UUID> {
     boolean existsBySlugAndIsDeletedFalse(String slug);
     Optional<Business> findBySlugAndIsDeletedFalse(String slug);
     List<Business> findAllByOwnerId(UUID ownerId);
+    List<Business> findAllByIsDeletedFalse();
 }
