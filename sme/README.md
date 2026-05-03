@@ -250,6 +250,121 @@ The Swagger UI exposes a server selector with the following environments:
 
 ---
 
+### Authentication Endpoints (`/api/v1/auth`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/register` | None | Register a new user and business. Rate limited: 5/hour per IP, 3/hour per email. |
+| `GET` | `/verify` | None | Verify email address using the token from the verification email. |
+| `POST` | `/resend-verification` | None | Resend the verification email for a pending account. |
+| `POST` | `/login` | None | Authenticate and receive a JWT access token (15 min) + refresh token (7 days). |
+| `POST` | `/refresh` | None | Exchange a valid refresh token for a new access token. |
+| `POST` | `/logout` | Bearer | Revoke the current refresh token. |
+
+**Registration request body:**
+```json
+{
+  "business": {
+    "email": "owner@example.com",
+    "password": "SecurePass1!",
+    "fullName": "Jane Doe",
+    "businessName": "Jane's Bakery",
+    "description": "Artisan breads and pastries"
+  }
+}
+```
+
+---
+
+### Account Management Endpoints (`/api/v1/account`)
+
+All account endpoints require a valid JWT Bearer token.
+
+| Method | Path | Role | Description |
+|--------|------|------|-------------|
+| `GET` | `/me` | Any | Retrieve the authenticated user's full profile (user + business details). |
+| `PUT` | `/profile` | Any | Update display name (`fullName`). |
+| `PUT` | `/password` | Any | Change password. Requires current password. Revokes all active refresh tokens on success. |
+| `PUT` | `/business` | OWNER, ADMIN | Update business name and/or description. Slug and public link are never changed. |
+| `DELETE` | `/` | Any | Soft-delete the account (and business). Requires password confirmation. |
+
+**`GET /me` — response shape (`data` field):**
+```json
+{
+  "userId": "uuid",
+  "email": "owner@example.com",
+  "fullName": "Jane Doe",
+  "accountStatus": "VERIFIED",
+  "role": "OWNER",
+  "userCreatedAt": "2025-01-01T10:00:00",
+  "userUpdatedAt": "2025-01-01T10:00:00",
+  "businessId": "uuid",
+  "businessName": "Jane's Bakery",
+  "businessDescription": "Artisan breads and pastries",
+  "slug": "janes-bakery",
+  "publicLink": "https://domain/store/janes-bakery",
+  "businessUpdatedAt": "2025-01-01T10:00:00"
+}
+```
+
+> The profile response never includes the password, tokens, or any internal security fields.
+
+**`PUT /business` — behaviour notes:**
+- `name` and `description` are both optional. Omit a field (or pass `null`) to leave it unchanged.
+- Changing the business name does **not** regenerate the slug or public link.
+- EMPLOYEE role receives `403 ACCESS_DENIED`.
+- Description is HTML-sanitized on write (`<script>` blocks and all HTML tags stripped).
+
+**`DELETE /` — request body:**
+```json
+{ "password": "your-current-password" }
+```
+On success, the user and their business are soft-deleted (`is_deleted = true`, `deleted_at` set). All refresh tokens are revoked. Subsequent requests with the old JWT return `401`.
+
+---
+
+### Public Store Endpoints (`/api/v1/public`)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/store/{slug}` | None | Retrieve public business info by slug. Returns name, slug, description, and public link only — no sensitive data. |
+
+---
+
+## Error Codes
+
+All error responses use the `ApiResponse` envelope with `success: false`. The `error.code` field is always `SCREAMING_SNAKE_CASE`.
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `EMAIL_ALREADY_EXISTS` | 409 | The email address is already registered to an active account. |
+| `INVALID_TOKEN` | 404 | The verification or refresh token does not exist. |
+| `TOKEN_EXPIRED` | 400 | The verification token has passed its 24-hour expiry window. |
+| `TOKEN_REVOKED` | 401 | The refresh token has been revoked (e.g., after logout or password change). |
+| `INVALID_CREDENTIALS` | 401 | The supplied password does not match the account's stored credentials. |
+| `ACCESS_DENIED` | 403 | The account is unverified, or the user lacks the required role for the resource. |
+| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests from this IP (>5/hour) or for this email (>3/hour). |
+| `INVALID_PASSWORD` | 400 | The password does not meet complexity requirements (length, uppercase, lowercase, digit, special character). |
+| `VALIDATION_FAILED` | 400 | One or more request fields failed Bean Validation or slug validation. |
+| `SLUG_GENERATION_FAILED` | 500 | Unique slug could not be generated after 5 retries. |
+| `ACCOUNT_ALREADY_DELETED` | 409 | The account has already been soft-deleted and cannot be acted upon. |
+| `INTERNAL_ERROR` | 500 | An unexpected server-side error occurred. No internal details are exposed. |
+
+**Error response shape:**
+```json
+{
+  "success": false,
+  "data": null,
+  "error": {
+    "code": "INVALID_CREDENTIALS",
+    "message": "Bad credentials"
+  },
+  "timestamp": "2025-05-03T10:00:00Z"
+}
+```
+
+---
+
 ## Testing
 
 - Unit tests: JUnit 5 + Mockito

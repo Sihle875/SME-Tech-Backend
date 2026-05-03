@@ -14,4 +14,6 @@ public final class ErrorCodes {
     public static final String ACCESS_DENIED = "ACCESS_DENIED";
     public static final String TOKEN_REVOKED = "TOKEN_REVOKED";
     public static final String INTERNAL_ERROR = "INTERNAL_ERROR";
+    public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
+    public static final String ACCOUNT_ALREADY_DELETED = "ACCOUNT_ALREADY_DELETED";
 }
