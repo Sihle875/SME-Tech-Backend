@@ -201,6 +201,7 @@ Deployments use the commit SHA tag (not `latest`) for traceability.
 ### Pipeline 2 — JAR-based deploy (`innovators`)
 
 **Workflow file:** `.github/workflows/dev_innovators.yml`  
+**Trigger branch:** `dev`  
 **Target app:** `innovators` (Production slot)
 
 Builds a JAR with Maven and deploys it directly to Azure App Service (no Docker).
