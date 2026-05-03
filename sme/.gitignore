@@ -6,6 +6,7 @@ target/
 
 ### Kiro ###
 .kiro/
+.errors/
 
 ### Project Documents ###
 documents/
