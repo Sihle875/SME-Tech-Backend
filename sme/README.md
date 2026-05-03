@@ -22,8 +22,8 @@ All secrets are injected via environment variables. **Never hardcode credentials
 | `DB_URL`                | Full JDBC connection URL (with SSL)              | Aiven PostgreSQL (`smetech` DB, port 12667, `sslmode=require`) |
 | `DB_USERNAME`           | PostgreSQL username                              | `avnadmin`                                                    |
 | `DB_PASSWORD`           | PostgreSQL password                              | `changeme` — **must be overridden**                           |
-| `APP_EMAIL`             | Gmail address used for sending emails            | `smetechinnovators@gmail.com`                                 |
-| `APP_PASSWORD`          | Gmail App Password (not your account password)   | `changeme` — **must be overridden**                           |
+| `APP_EMAIL`             | Gmail address used for sending emails (binds to `spring.mail.username`) | `smetechinnovators@gmail.com`          |
+| `APP_PASSWORD`          | Gmail App Password — not your account password (binds to `spring.mail.password`) | `changeme` — **must be overridden** |
 | `JWT_SECRET`            | Hex-encoded 256-bit secret for JWT signing       | `404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970` — **hardcoded fallback, must be overridden in production** |
 | `APP_BASE_URL`          | Base URL used in email verification links        | `https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net` |
 | `APP_DOMAIN`            | Domain used for public storefront links          | `localhost:8080`                                              |
@@ -119,7 +119,7 @@ Email is sent via Gmail SMTP using async delivery with retry logic (3 attempts, 
 | Read timeout         | 10,000 ms          |
 | Write timeout        | 10,000 ms          |
 
-Credentials are injected via `APP_EMAIL` and `APP_PASSWORD` environment variables. Use a Gmail App Password — not your account password.
+Credentials are injected via the `APP_EMAIL` and `APP_PASSWORD` environment variables, which bind to `spring.mail.username` and `spring.mail.password` respectively. Use a Gmail App Password — not your account password.
 
 > The test profile disables SMTP entirely and uses a local stub on port 3025.
 

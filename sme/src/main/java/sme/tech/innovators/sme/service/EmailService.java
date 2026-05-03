@@ -19,7 +19,7 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @Value("${app.email}")
+    @Value("${spring.mail.username}")
     private String fromEmail;
 
     @Async("emailTaskExecutor")
