@@ -24,7 +24,7 @@ All secrets are injected via environment variables. **Never hardcode credentials
 | `DB_PASSWORD`           | PostgreSQL password                              | `changeme` — **must be overridden**                           |
 | `APP_EMAIL`             | Gmail address used for sending emails            | `smetechinnovators@gmail.com`                                 |
 | `APP_PASSWORD`          | Gmail App Password (not your account password)   | `changeme` — **must be overridden**                           |
-| `JWT_SECRET`            | Hex-encoded 256-bit secret for JWT signing       | Insecure default — **must be overridden in production**       |
+| `JWT_SECRET`            | Hex-encoded 256-bit secret for JWT signing       | `404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970` — **hardcoded fallback, must be overridden in production** |
 | `APP_BASE_URL`          | Base URL used in email verification links        | `https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net` |
 | `APP_DOMAIN`            | Domain used for public storefront links          | `localhost:8080`                                              |
 | `CORS_ALLOWED_ORIGINS`  | Comma-separated list of allowed CORS origins | `http://localhost:8080,http://localhost:5173,https://sme-operations.netlify.app,https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net/` |
