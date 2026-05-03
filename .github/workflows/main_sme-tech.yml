@@ -3,7 +3,7 @@ name: Build, Push to Docker Hub and Deploy to Azure
 on:
   push:
     branches:
-      - main
+      - dev
   workflow_dispatch:
 
 env:
