@@ -44,6 +44,9 @@ build/
 *.env
 application-local.yaml
 application-local.yml
+.github/workflows/main_sme-innovators.yml
+.github/workflows/main_sme-tech.yml
+.github/workflows/main_sme-operations.yml
 
 ### OS ###
 .DS_Store
