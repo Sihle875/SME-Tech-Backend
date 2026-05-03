@@ -157,13 +157,14 @@ Schema is managed by Hibernate (`ddl-auto: update`). No manual migrations needed
 
 ## Deployment
 
-Two CI/CD pipelines run on every push to `dev`, deploying to separate Azure App Service instances.
+Two CI/CD pipelines deploy to separate Azure App Service instances. Each pipeline triggers on a different branch.
 
 ---
 
 ### Pipeline 1 — Docker-based deploy (`sme-tech`)
 
 **Workflow file:** `.github/workflows/main_sme-tech.yml`  
+**Trigger branch:** `main`  
 **Target app:** `sme-tech` (Production slot)
 
 Builds a Docker image, pushes it to Docker Hub, then deploys it to Azure App Service.
