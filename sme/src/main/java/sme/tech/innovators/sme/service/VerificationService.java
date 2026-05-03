@@ -25,13 +25,14 @@ public class VerificationService {
 
     @Transactional
     public VerificationToken createVerificationToken(User user) {
+        // @Modifying JPQL delete executes immediately, bypassing Hibernate's action queue
         verificationTokenRepository.deleteByUser(user);
         verificationTokenRepository.flush();
         VerificationToken token = VerificationToken.builder()
                 .token(tokenGenerator.generateSecureToken())
                 .user(user)
                 .build();
-        return verificationTokenRepository.save(token);
+        return verificationTokenRepository.saveAndFlush(token);
     }
 
     @Transactional
