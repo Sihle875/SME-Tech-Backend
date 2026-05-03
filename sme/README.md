@@ -157,42 +157,74 @@ Schema is managed by Hibernate (`ddl-auto: update`). No manual migrations needed
 
 ## Deployment
 
-The application is containerised and deployed to **Azure App Service** (`sme-tech`) via GitHub Actions on every push to `dev`.
+Two CI/CD pipelines run on every push to `dev`, deploying to separate Azure App Service instances.
 
-### CI/CD Pipeline (`.github/workflows/main_sme-tech.yml`)
+---
 
-The pipeline runs two sequential jobs:
+### Pipeline 1 — Docker-based deploy (`sme-tech`)
+
+**Workflow file:** `.github/workflows/main_sme-tech.yml`  
+**Target app:** `sme-tech` (Production slot)
+
+Builds a Docker image, pushes it to Docker Hub, then deploys it to Azure App Service.
 
 | Job | Step | Description |
 |-----|------|-------------|
-| `build-and-push` | Checkout | Checks out the repository |
+| `build` | Checkout | Checks out the repository |
 | | Docker Buildx | Sets up multi-platform build support |
 | | Docker Hub login | Authenticates with Docker Hub using `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` secrets |
-| | Build & push image | Builds the Docker image from `sme/Dockerfile` and pushes two tags to Docker Hub: `latest` and the commit SHA |
-| `deploy` | Azure login | Authenticates with Azure via OIDC (Workload Identity Federation) |
-| | Deploy to App Service | Pulls the commit-SHA-tagged image from Docker Hub and deploys it to the `sme-tech` Production slot |
+| | Build & push image | Builds from `sme/Dockerfile`; pushes `latest` and commit-SHA tags to Docker Hub |
+| `deploy` | Azure login | Authenticates via OIDC (Workload Identity Federation) |
+| | Deploy to App Service | Deploys the image to the `sme-tech` Production slot |
 
-### Docker Image
-
-Images are published to Docker Hub under:
+**Docker images** are published to Docker Hub as:
 ```
 <DOCKERHUB_USERNAME>/sme-tech-backend:<commit-sha>
 <DOCKERHUB_USERNAME>/sme-tech-backend:latest
 ```
 
-Deployments always use the commit SHA tag (not `latest`) to ensure traceability and prevent accidental rollouts of stale images.
+Deployments use the commit SHA tag (not `latest`) for traceability.
 
-### Required GitHub Secrets
+**Required secrets:**
 
 | Secret | Description |
 |--------|-------------|
 | `DOCKERHUB_USERNAME` | Docker Hub account username |
-| `DOCKERHUB_TOKEN` | Docker Hub access token (not your account password) |
-| `AZUREAPPSERVICE_CLIENTID_*` | Azure AD app client ID for OIDC login |
-| `AZUREAPPSERVICE_TENANTID_*` | Azure AD tenant ID |
-| `AZUREAPPSERVICE_SUBSCRIPTIONID_*` | Azure subscription ID |
+| `DOCKERHUB_TOKEN` | Docker Hub access token |
+| `AZUREAPPSERVICE_CLIENTID_2A69...` | Azure AD client ID for `sme-tech` |
+| `AZUREAPPSERVICE_TENANTID_53A7...` | Azure AD tenant ID |
+| `AZUREAPPSERVICE_SUBSCRIPTIONID_1E5E...` | Azure subscription ID |
 
-> Environment variables (DB credentials, JWT secret, mail credentials, CORS origins) must be configured in the Azure App Service **Configuration → Application Settings** panel — they are not baked into the Docker image.
+---
+
+### Pipeline 2 — JAR-based deploy (`innovators`)
+
+**Workflow file:** `.github/workflows/dev_innovators.yml`  
+**Target app:** `innovators` (Production slot)
+
+Builds a JAR with Maven and deploys it directly to Azure App Service (no Docker).
+
+| Job | Step | Description |
+|-----|------|-------------|
+| `build` | Checkout | Checks out the repository |
+| | Set up Java 21 | Installs Java 21 (Microsoft distribution) |
+| | Build with Maven | Runs `mvn -B clean package -DskipTests` from the `sme/` directory |
+| | Upload artifact | Uploads `sme/target/*.jar` as the `java-app` artifact |
+| `deploy` | Download artifact | Retrieves the built JAR |
+| | Azure login | Authenticates via OIDC (Workload Identity Federation) |
+| | Deploy to App Service | Deploys `*.jar` to the `innovators` Production slot; startup command: `java -jar /home/site/wwwroot/*.jar` |
+
+**Required secrets:**
+
+| Secret | Description |
+|--------|-------------|
+| `AZUREAPPSERVICE_CLIENTID_7090...` | Azure AD client ID for `innovators` |
+| `AZUREAPPSERVICE_TENANTID_715A...` | Azure AD tenant ID |
+| `AZUREAPPSERVICE_SUBSCRIPTIONID_C5B5...` | Azure subscription ID |
+
+---
+
+> For both pipelines, environment variables (DB credentials, JWT secret, mail credentials, CORS origins) must be set in the Azure App Service **Configuration → Application Settings** panel — they are never baked into the build artifact.
 
 ---
 
@@ -212,7 +244,7 @@ The Swagger UI exposes a server selector with the following environments:
 |-------------|-----|
 | Local Development | `http://localhost:8080` |
 | Production | `https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net` |
-| QA | `https://sme-tech-brdyghahdgcab3a2.brazilsouth-01.azurewebsites.net` |
+| dev | `https://innovators-d2b3gycthabmdnhj.southafricanorth-01.azurewebsites.net` |
 
 ---
 

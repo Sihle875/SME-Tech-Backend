@@ -29,7 +29,7 @@ public class OpenApiConfig {
                 .servers(List.of(
                         new Server().url("http://localhost:8080").description("Local Development"),
                         new Server().url("https://sme-operations-dza7e5czhdggexfh.canadacentral-01.azurewebsites.net").description("Production"),
-                        new Server().url("https://https://sme-innovators-ghe7c3gne0audrcp.southafricanorth-01.azurewebsites.net").description("QA")))
+                        new Server().url("https://innovators-d2b3gycthabmdnhj.southafricanorth-01.azurewebsites.net").description("dev")))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication", new SecurityScheme()
