@@ -19,7 +19,7 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @Value("${app.mail}")
+    @Value("${app.email}")
     private String fromEmail;
 
     @Async("emailTaskExecutor")
