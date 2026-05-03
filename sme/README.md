@@ -157,7 +157,7 @@ Schema is managed by Hibernate (`ddl-auto: update`). No manual migrations needed
 
 ## Deployment
 
-The application is containerised and deployed to **Azure App Service** (`sme-tech`) via GitHub Actions on every push to `main`.
+The application is containerised and deployed to **Azure App Service** (`sme-tech`) via GitHub Actions on every push to `dev`.
 
 ### CI/CD Pipeline (`.github/workflows/main_sme-tech.yml`)
 
